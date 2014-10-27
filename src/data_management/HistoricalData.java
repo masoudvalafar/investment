@@ -4,6 +4,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class HistoricalData {
 	
+	String symbol;
 	String date;
 	double open;
 	double high;
@@ -12,7 +13,8 @@ public class HistoricalData {
 	Long volume;
 	double adjClose;
 	
-	HistoricalData(CSVRecord csvRecor) {
+	HistoricalData(CSVRecord csvRecor, String symbol) {
+		this.symbol = symbol;
 		this.date = csvRecor.get(0);
 		this.open = Double.valueOf(csvRecor.get(1));
 		this.high = Double.valueOf(csvRecor.get(2));
@@ -20,6 +22,10 @@ public class HistoricalData {
 		this.close = Double.valueOf(csvRecor.get(4));
 		this.volume = Long.valueOf(csvRecor.get(5));
 		this.adjClose = Double.valueOf(csvRecor.get(6));
+	}
+	
+	public String getSymbol() {
+		return symbol;
 	}
 	
 	public String getDate() {

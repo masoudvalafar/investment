@@ -1,4 +1,4 @@
-package data_management.exceptions;
+package data_management;
 
 public class SymbolNotFoundException extends Exception {
 

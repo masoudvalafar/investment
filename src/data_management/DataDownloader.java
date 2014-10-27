@@ -1,8 +1,7 @@
 package data_management;
 
 import java.text.ParseException;
-
-import data_management.exceptions.SymbolNotFoundException;
+import java.util.Date;
 
 public interface DataDownloader {
 
@@ -15,5 +14,7 @@ public interface DataDownloader {
 	 * @throws SymbolNotFoundException 
 	 */
 	String getHistoricalData(String symbol) throws ParseException, SymbolNotFoundException;
+	String getHistoricalData(String symbol, Date startDate) throws SymbolNotFoundException;
+	String getHistoricalData(String symbol, Date startDate, Date endDate) throws SymbolNotFoundException;
 
 }
