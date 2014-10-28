@@ -29,15 +29,19 @@ public class RunInvestment {
 		try {
 			for (Company company : Company.values()) {
 				
+				System.out.println("working on symbol: " + company.getSymbol());
+				
 				// get last update
-				Date startDate = dbConnector.getLastUpdate(company.getSymbol());
-				if (startDate == null) {
-					startDate = new SimpleDateFormat("MM/dd/yy").parse("1/1/1900");
-				} 
+				Date lastAvailableDataPointDate = dbConnector.getLastUpdate(company.getSymbol());
+				if (lastAvailableDataPointDate == null) {
+					lastAvailableDataPointDate = new SimpleDateFormat("yyyy-mm-dd").parse("1900-1-1");
+				}
+				System.out.println("got last update!");
 				
 				// get data
 				try {
-					response = dataDownloader.getHistoricalData(company.getSymbol(), startDate);
+					response = dataDownloader.getHistoricalData(company.getSymbol(), lastAvailableDataPointDate);
+					System.out.println("downloaded the data.");
 				} catch (SymbolNotFoundException e) {
 					System.out.println(company.getSymbol() + ": " + e);
 					continue;
@@ -47,12 +51,14 @@ public class RunInvestment {
 				List<HistoricalData> data = null;
 				try {
 					data = dataParser.parseData(company.getSymbol(), response, DocumentFormats.CSV);
+					System.out.println("completed parsing the data. data length: " + data.size());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println("error in parsing data!");
+					System.out.println(e);
 				}
-				dbConnector.insertHistoricalData(company.getSymbol(), data);
 				
+				dbConnector.insertHistoricalData(company.getSymbol(), data);
+				System.out.println("completed inserting the data.");
 			}
 		} catch (ParseException e) {
 		}

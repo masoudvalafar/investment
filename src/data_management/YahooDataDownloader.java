@@ -41,7 +41,7 @@ public class YahooDataDownloader implements DataDownloader {
 
 	@Override
 	public String getHistoricalData(String symbol) throws ParseException, SymbolNotFoundException {
-		Date startDate = new SimpleDateFormat("MM/dd/yy").parse("1/1/1900");
+		Date startDate = new SimpleDateFormat("yyyy-mm-dd").parse("1900/1/1");
 		return getHistoricalData(symbol, startDate);
 	}
 

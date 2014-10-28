@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class DatabaseConnector {
 		Statement statement;
 		try {
 			statement = connection.createStatement();
-			statement.executeUpdate("drop table if exists symbols;");
-			statement.executeUpdate("drop table if exists symbols_historical_price;");
+//			statement.executeUpdate("drop table if exists symbols;");
+//			statement.executeUpdate("drop table if exists symbols_historical_price;");
 
 			ResultSet resultSet = statement
 					.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='symbols'");
@@ -84,7 +85,7 @@ public class DatabaseConnector {
 			resultSet = statement.executeQuery("SELECT last_data_date, first_data_date FROM symbols where symbol = '"
 					+ symbol + "'");
 			String result = resultSet.getString(lastDay ? 1 : 2);
-			return result == null ? null : new SimpleDateFormat("MM/dd/yy").parse(result);
+			return result == null ? null : new SimpleDateFormat("yyyy-mm-dd").parse(result);
 		} catch (SQLException e) {
 			System.out.println("db issues!");
 			System.out.println(e);
@@ -97,14 +98,14 @@ public class DatabaseConnector {
 			return false;
 		}
 
-		Date lastDate = new SimpleDateFormat("MM/dd/yy").parse(dataList.get(0).getDate());
-		Date firstDate = new SimpleDateFormat("MM/dd/yy").parse(dataList.get(0).getDate());
+		Date lastDate = new SimpleDateFormat("yyyy-mm-dd").parse(dataList.get(0).getDate());
+		Date firstDate = new SimpleDateFormat("yyyy-mm-dd").parse(dataList.get(0).getDate());
 
 		try {
 			PreparedStatement prep;
 			prep = connection.prepareStatement("insert into symbols_historical_price values (?, ?, ?, ?, ?, ?, ?, ?);");
 			for (HistoricalData data : dataList) {
-				Date historicalDataDate = new SimpleDateFormat("MM/dd/yy").parse(data.getDate());
+				Date historicalDataDate = new SimpleDateFormat("yyyy-mm-dd").parse(data.getDate());
 				if (historicalDataDate.after(lastDate)) {
 					lastDate = historicalDataDate;
 				}
@@ -121,8 +122,8 @@ public class DatabaseConnector {
 				prep.setLong(7, data.getVolume());
 				prep.setDouble(8, data.getAdjClose());
 				prep.addBatch();
-				prep.executeBatch();
 			}
+			prep.executeBatch();
 
 		} catch (SQLException e) {
 			System.out.println("error!!!");
@@ -137,7 +138,7 @@ public class DatabaseConnector {
 			String lastUpdatePreparedStatement = "UPDATE symbols SET last_data_date = ? WHERE symbol = ?;";
 			try {
 				PreparedStatement prep = connection.prepareStatement(lastUpdatePreparedStatement);
-				prep.setString(1, lastDate.toString());
+				prep.setString(1, getDateInFormat(lastDate));
 				prep.setString(2, symbol);
 				prep.executeUpdate();
 			} catch (SQLException e) {
@@ -152,7 +153,7 @@ public class DatabaseConnector {
 			String firstUpdatePreparedStatement = "UPDATE symbols SET first_data_date = ? WHERE symbol = ?;";
 			try {
 				PreparedStatement prep = connection.prepareStatement(firstUpdatePreparedStatement);
-				prep.setString(1, firstDate.toString());
+				prep.setString(1, getDateInFormat(firstDate));
 				prep.setString(2, symbol);
 				prep.executeUpdate();
 			} catch (SQLException e) {
@@ -162,5 +163,11 @@ public class DatabaseConnector {
 		}
 
 		return true;
+	}
+
+	private String getDateInFormat(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) - 1) + "-" + cal.get(Calendar.DAY_OF_MONTH);
 	}
 }
