@@ -85,7 +85,7 @@ public class DatabaseConnector {
 			resultSet = statement.executeQuery("SELECT last_data_date, first_data_date FROM symbols where symbol = '"
 					+ symbol + "'");
 			String result = resultSet.getString(lastDay ? 1 : 2);
-			return result == null ? null : new SimpleDateFormat("yyyy-mm-dd").parse(result);
+			return result == null ? null : new SimpleDateFormat("yyyy-MM-dd").parse(result);
 		} catch (SQLException e) {
 			System.out.println("db issues!");
 			System.out.println(e);
@@ -98,14 +98,16 @@ public class DatabaseConnector {
 			return false;
 		}
 
-		Date lastDate = new SimpleDateFormat("yyyy-mm-dd").parse(dataList.get(0).getDate());
-		Date firstDate = new SimpleDateFormat("yyyy-mm-dd").parse(dataList.get(0).getDate());
+		Date lastDate = new SimpleDateFormat("yyyy-MM-dd").parse(dataList.get(0).getDate());
+		Date firstDate = new SimpleDateFormat("yyyy-MM-dd").parse(dataList.get(0).getDate());
 
 		try {
 			PreparedStatement prep;
 			prep = connection.prepareStatement("insert into symbols_historical_price values (?, ?, ?, ?, ?, ?, ?, ?);");
 			for (HistoricalData data : dataList) {
-				Date historicalDataDate = new SimpleDateFormat("yyyy-mm-dd").parse(data.getDate());
+//				System.out.println(data.getDate());
+				Date historicalDataDate = new SimpleDateFormat("yyyy-MM-dd").parse(data.getDate());
+//				System.out.println(historicalDataDate);
 				if (historicalDataDate.after(lastDate)) {
 					lastDate = historicalDataDate;
 				}
@@ -168,6 +170,13 @@ public class DatabaseConnector {
 	private String getDateInFormat(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
-		return cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) - 1) + "-" + cal.get(Calendar.DAY_OF_MONTH);
+		return cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-" + cal.get(Calendar.DAY_OF_MONTH);
+	}
+	
+	public static void main(String args[]) throws ParseException {
+		DatabaseConnector d = new DatabaseConnector();
+		Date from = new SimpleDateFormat("yyyy-MM-dd").parse("2010-11-01");
+		System.out.println(from);
+		System.out.println(d.getDateInFormat(from));
 	}
 }

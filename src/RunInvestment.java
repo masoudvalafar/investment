@@ -3,7 +3,6 @@ import general.Company;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +33,9 @@ public class RunInvestment {
 				// get last update
 				Date lastAvailableDataPointDate = dbConnector.getLastUpdate(company.getSymbol());
 				if (lastAvailableDataPointDate == null) {
-					lastAvailableDataPointDate = new SimpleDateFormat("yyyy-mm-dd").parse("1900-1-1");
+					lastAvailableDataPointDate = new SimpleDateFormat("yyyy-MM-dd").parse("1900-01-01");
 				}
-				System.out.println("got last update!");
+				System.out.println("got last update: " + lastAvailableDataPointDate);
 				
 				// get data
 				try {
@@ -47,6 +46,10 @@ public class RunInvestment {
 					continue;
 				}
 
+				if (response == null) {
+					System.out.println("no data to work on!");
+					continue;
+				}
 				// insert to db
 				List<HistoricalData> data = null;
 				try {

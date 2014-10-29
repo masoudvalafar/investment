@@ -26,12 +26,12 @@ public class YahooDataDownloader implements DataDownloader {
 		cal.setTime(startDate);
 		StringBuilder request = new StringBuilder();
 		request.append("s=" + symbol);
-		request.append("&a=" + (cal.get(Calendar.MONTH) - 1));
+		request.append("&a=" + (cal.get(Calendar.MONTH)));
 		request.append("&b=" + cal.get(Calendar.DAY_OF_MONTH));
 		request.append("&c=" + cal.get(Calendar.YEAR));
 
 		cal.setTime(today);
-		request.append("&d=" + (cal.get(Calendar.MONTH) - 1));
+		request.append("&d=" + (cal.get(Calendar.MONTH)));
 		request.append("&e=" + cal.get(Calendar.DAY_OF_MONTH));
 		request.append("&f=" + cal.get(Calendar.YEAR));
 		request.append("&g=d"); // daily
@@ -41,7 +41,7 @@ public class YahooDataDownloader implements DataDownloader {
 
 	@Override
 	public String getHistoricalData(String symbol) throws ParseException, SymbolNotFoundException {
-		Date startDate = new SimpleDateFormat("yyyy-mm-dd").parse("1900/1/1");
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("1900-01-01");
 		return getHistoricalData(symbol, startDate);
 	}
 
@@ -53,9 +53,14 @@ public class YahooDataDownloader implements DataDownloader {
 
 	@Override
 	public String getHistoricalData(String symbol, Date startDate, Date endDate) throws SymbolNotFoundException {
+		if (endDate.before(startDate)) {
+			return null;
+		}
+		
 		String queryText = BuildHistoricalDataRequest(symbol, startDate, endDate);
 		String url = String.format("%s%s", BASE_URL, queryText);
 
+		System.out.println("Downloading data from " + startDate + " to " + endDate);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse httpResponse = null;
@@ -80,5 +85,13 @@ public class YahooDataDownloader implements DataDownloader {
 		}
 
 		return response;
+	}
+	
+	public static void main(String[] args) throws ParseException, SymbolNotFoundException {
+		YahooDataDownloader y = new YahooDataDownloader();
+		
+		Date from = new SimpleDateFormat("yyyy-MM-dd").parse("2010-11-01");
+		Date to = new SimpleDateFormat("yyyy-MM-dd").parse("2010-12-05");
+		System.out.println(y.getHistoricalData("YHOO", from, to));
 	}
 }
