@@ -35,8 +35,8 @@ public class DatabaseConnector {
 		Statement statement;
 		try {
 			statement = connection.createStatement();
-//			statement.executeUpdate("drop table if exists symbols;");
-//			statement.executeUpdate("drop table if exists symbols_historical_price;");
+			// statement.executeUpdate("drop table if exists symbols;");
+			// statement.executeUpdate("drop table if exists symbols_historical_price;");
 
 			ResultSet resultSet = statement
 					.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='symbols'");
@@ -105,9 +105,9 @@ public class DatabaseConnector {
 			PreparedStatement prep;
 			prep = connection.prepareStatement("insert into symbols_historical_price values (?, ?, ?, ?, ?, ?, ?, ?);");
 			for (HistoricalData data : dataList) {
-//				System.out.println(data.getDate());
+				// System.out.println(data.getDate());
 				Date historicalDataDate = new SimpleDateFormat("yyyy-MM-dd").parse(data.getDate());
-//				System.out.println(historicalDataDate);
+				// System.out.println(historicalDataDate);
 				if (historicalDataDate.after(lastDate)) {
 					lastDate = historicalDataDate;
 				}
@@ -172,11 +172,28 @@ public class DatabaseConnector {
 		cal.setTime(date);
 		return cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-" + cal.get(Calendar.DAY_OF_MONTH);
 	}
-	
+
 	public static void main(String args[]) throws ParseException {
 		DatabaseConnector d = new DatabaseConnector();
 		Date from = new SimpleDateFormat("yyyy-MM-dd").parse("2010-11-01");
 		System.out.println(from);
 		System.out.println(d.getDateInFormat(from));
+	}
+
+	public void getHistoricalPricing(String symbol) {
+		Statement statement = null;
+		ResultSet resultSet = null;
+		try {
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery("SELECT date, close FROM symbols_historical_price where symbol = '"
+					+ symbol + "'");
+			while (resultSet.next()){
+				System.out.println(resultSet.getString("date"));
+				System.out.println(resultSet.getDouble("close"));
+			}
+		} catch (SQLException e) {
+			System.out.println("db issues!");
+			System.out.println(e);
+		}
 	}
 }

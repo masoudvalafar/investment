@@ -17,13 +17,14 @@ import data_storage.DatabaseConnector;
 public class RunInvestment {
 
 	public static void main(String[] args) {
+		
+		// Initializing and downloading data for the companies
+		/*
 		DataDownloader dataDownloader = new YahooDataDownloader();
 		DataParser dataParser = new DataParser();
 		DatabaseConnector dbConnector = DatabaseConnector.getInstance();
-		
-		// we should pass all companies!?
-		dbConnector.initializeDB();
 
+		dbConnector.initializeDB();
 		String response = null;
 		try {
 			for (Company company : Company.values()) {
@@ -64,8 +65,21 @@ public class RunInvestment {
 				System.out.println("completed inserting the data.");
 			}
 		} catch (ParseException e) {
+			System.out.println("error in parsing...");
+			System.out.println(e);
 		}
+		*/
 
+		// Event handling
+		DatabaseConnector dbConnector = DatabaseConnector.getInstance();
+		dbConnector.getHistoricalPricing(Company.snp.getSymbol());
+		
+		for (Company company : Company.values()) {
+			if (company == Company.snp) {
+				continue;
+			}
+		}
+		
 
 	}
 
