@@ -1,5 +1,8 @@
 package data_management;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.commons.csv.CSVRecord;
 
 public class HistoricalData {
@@ -13,15 +16,21 @@ public class HistoricalData {
 	Long volume;
 	double adjClose;
 	
-	HistoricalData(CSVRecord csvRecor, String symbol) {
+	public HistoricalData(ResultSet resultSet) throws SQLException {
+		this.symbol = resultSet.getString("symbol");
+		this.date = resultSet.getString("date");
+		this.close = resultSet.getDouble("close");
+	}
+	
+	public HistoricalData(CSVRecord csvRecord, String symbol) {
 		this.symbol = symbol;
-		this.date = csvRecor.get(0);
-		this.open = Double.valueOf(csvRecor.get(1));
-		this.high = Double.valueOf(csvRecor.get(2));
-		this.low = Double.valueOf(csvRecor.get(3));
-		this.close = Double.valueOf(csvRecor.get(4));
-		this.volume = Long.valueOf(csvRecor.get(5));
-		this.adjClose = Double.valueOf(csvRecor.get(6));
+		this.date = csvRecord.get(0);
+		this.open = Double.valueOf(csvRecord.get(1));
+		this.high = Double.valueOf(csvRecord.get(2));
+		this.low = Double.valueOf(csvRecord.get(3));
+		this.close = Double.valueOf(csvRecord.get(4));
+		this.volume = Long.valueOf(csvRecord.get(5));
+		this.adjClose = Double.valueOf(csvRecord.get(6));
 	}
 	
 	public String getSymbol() {

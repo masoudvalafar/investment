@@ -1,18 +1,4 @@
-import general.Company;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import data_management.DataDownloader;
-import data_management.DataParser;
-import data_management.DocumentFormats;
-import data_management.HistoricalData;
-import data_management.SymbolNotFoundException;
-import data_management.YahooDataDownloader;
-import data_storage.DatabaseConnector;
+import event_management.EventManager;
 
 public class RunInvestment {
 
@@ -70,17 +56,15 @@ public class RunInvestment {
 		}
 		*/
 
-		// Event handling
-		DatabaseConnector dbConnector = DatabaseConnector.getInstance();
-		dbConnector.getHistoricalPricing(Company.snp.getSymbol());
+		/*
+		 *  Event handling
+		 */
 		
-		for (Company company : Company.values()) {
-			if (company == Company.snp) {
-				continue;
-			}
-		}
+		// create an event filter, pass it to eventmanager and it finds all the similar 
 		
-
+		EventManager eventManager = EventManager.getInstance();
+		eventManager.findEvents();
+		
 	}
 
 }

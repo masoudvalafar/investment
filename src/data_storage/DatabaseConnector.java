@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -180,20 +181,25 @@ public class DatabaseConnector {
 		System.out.println(d.getDateInFormat(from));
 	}
 
-	public void getHistoricalPricing(String symbol) {
+	public List<HistoricalData> getHistoricalPricing(String symbol) {
+
+		List<HistoricalData> results = new ArrayList<HistoricalData>();
+
 		Statement statement = null;
 		ResultSet resultSet = null;
 		try {
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery("SELECT date, close FROM symbols_historical_price where symbol = '"
-					+ symbol + "'");
-			while (resultSet.next()){
-				System.out.println(resultSet.getString("date"));
-				System.out.println(resultSet.getDouble("close"));
+			resultSet = statement
+					.executeQuery("SELECT symbol, date, close FROM symbols_historical_price where symbol = '" + symbol
+							+ "'");
+			while (resultSet.next()) {
+				results.add(new HistoricalData(resultSet));
 			}
 		} catch (SQLException e) {
 			System.out.println("db issues!");
 			System.out.println(e);
 		}
+
+		return results;
 	}
 }
