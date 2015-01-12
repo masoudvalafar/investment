@@ -80,7 +80,9 @@ public class YahooDataDownloader implements DataDownloader {
 			InputStream is = httpResponse.getEntity().getContent();
 			IOUtils.copy(is, writer, "UTF-8");
 			response = writer.toString();
-		} catch (IllegalStateException | IOException e) {
+		} catch (IllegalStateException e) {
+			System.out.println(e);
+		} catch ( IOException e) {
 			System.out.println(e);
 		}
 

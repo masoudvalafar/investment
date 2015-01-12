@@ -2,10 +2,12 @@ package event_management;
 
 import general.Company;
 
-import java.util.ArrayList;
+import java.text.ParseException;
 import java.util.List;
 
 import calculation.Calculator;
+import data_management.DataManager;
+import data_management.EventMonitoringResult;
 import data_management.HistoricalData;
 import data_storage.DatabaseConnector;
 
@@ -14,7 +16,8 @@ public class EventManager {
 	private static EventManager eventManager;
 	List<HistoricalData> snpResultsOriginal = null;
 	DatabaseConnector dbConnector = DatabaseConnector.getInstance();
-	private int monitoringPeriod = 20;
+	private DataManager dataManager = new DataManagerImpl();
+	Calculator calculator = new CalculatorImpl();
 
 	public static EventManager getInstance() {
 		if (eventManager == null) {
@@ -25,93 +28,49 @@ public class EventManager {
 
 	}
 
-	public void findEvents() {
-
-		List<List<Double>> positiveEventsObservation = new ArrayList<List<Double>>();
-		List<List<Double>> negativeEventsObservation = new ArrayList<List<Double>>();
-		ArrayList<Integer> companyNegativeEvents = new ArrayList<Integer>();
-		ArrayList<Integer> companyPositiveEvents = new ArrayList<Integer>();
-
-		for (Company company : Company.values()) {
-
-			if (company == Company.snp) {
-				continue;
-			}
-
-			companyNegativeEvents.clear();
-			companyPositiveEvents.clear();
-
-			/*
-			 * getting/loading the data for symbol
-			 */
-			Calculator calculator = new Calculator(getSNPResults(), dbConnector.getHistoricalPricing(company
-					.getSymbol()));
-			calculator.syncResults();
-
-			/*
-			 * comparing symbol changes vs snp to find the events
-			 */
-			double symbolGain = -1;
-			double snpGain = -1;
-
-			for (int day = calculator.getSymbolTotalDays() - 2; day > 0; day--) {
-
-				symbolGain = calculator.getSymbolGain(day);
-				snpGain = calculator.getSnpGain(day);
-
-				// event definition
-				double relativeGain = symbolGain - snpGain;
-				if (Math.abs(relativeGain) > 4) {
-					if (relativeGain > 4) {
-						companyPositiveEvents.add(day);
-					} else {
-						companyNegativeEvents.add(day);
-					}
-
-//					System.out.println(company.getSymbol() + " - snp gain: " + snpGain + " - symbol gain: "
-//							+ symbolGain + " - " + relativeGain);
-				}
-			}
-
-			/*
-			 * getting the data from monitoringPeriod days before events until
-			 * monitoringPeriod after
-			 */
-
-			for (int event : companyNegativeEvents) {
-				if (event > this.monitoringPeriod && event < calculator.getSymbolTotalDays() - monitoringPeriod) {
-					// monitoring event from 10 days earlier to 10 days after
-					ArrayList<Double> monitoring = new ArrayList<Double>();
-					for (int i = event + monitoringPeriod; i > event - (monitoringPeriod + 1); i--) {
-						monitoring.add(calculator.getSymbolGain(i));
-					}
-					negativeEventsObservation.add(monitoring);
-				}
-
-			}
-
-			for (int event : companyPositiveEvents) {
-				if (event > this.monitoringPeriod && event < calculator.getSymbolTotalDays() - monitoringPeriod) {
-					// monitoring event from 10 days earlier to 10 days after
-					ArrayList<Double> monitoring = new ArrayList<Double>();
-					for (int i = event + monitoringPeriod; i > event - (monitoringPeriod + 1); i--) {
-						monitoring.add(calculator.getSymbolGain(i));
-					}
-					positiveEventsObservation.add(monitoring);
-				}
-
-			}
-			break;
-		}
+	/*
+	 * TODO: This method is not implemented completely
+	 */
+	public void findEvents(String symbol) {
+		// getting data
+		List<HistoricalData> symbolData =  dataManager.getData(symbol);
+		List<HistoricalData> snpData = dataManager.getData(Company.snp.getSymbol());
 		
+		// syncing them
+		int minLength = Math.min(symbolData.size(), snpData.size());
+		symbolData = symbolData.subList(symbolData.size() - minLength, symbolData.size());
+		snpData = snpData.subList(snpData.size() - minLength, snpData.size());
+		System.out.println(symbolData.get(0).getDate());
+		System.out.println(snpData.get(0).getDate());
+		// calculating gain
 	}
 
-	private List<HistoricalData> getSNPResults() {
-		if (snpResultsOriginal == null) {
-			snpResultsOriginal = dbConnector.getHistoricalPricing(Company.snp.getSymbol());
+	
+	public void monitorEvent(String symbol, int monitoringPeriod, String date) {
+		EventMonitoringResult symbolData;
+		EventMonitoringResult snpData;
+		try {
+			symbolData = dataManager.getData(symbol, monitoringPeriod, date);
+			snpData = dataManager.getData(Company.snp.getSymbol(), monitoringPeriod, date);
+			/*
+			 * this is for testing getData and needs to move to a test file
+			if (a.getTargetDateResult() != null) {
+				System.out.println(a.getTargetDateResult().getDate());
+			}
+			System.out.println(a.getBeforeTargetList().get(0).getDate());
+			System.out.println(a.getBeforeTargetList().get(19).getDate());
+			System.out.println(a.getAfterTargetList().get(0).getDate());
+			System.out.println(a.getAfterTargetList().get(19).getDate());
+			*/
+		} catch (ParseException e) {
+			return;
 		}
-
-		return new ArrayList<HistoricalData>(snpResultsOriginal);
+		
+		List<Double> a = calculator.calculateGain(symbolData, snpData);
+		System.out.println(a.size());
+		for (Double d: a) {
+			System.out.println(d);
+		}
 	}
 
 }

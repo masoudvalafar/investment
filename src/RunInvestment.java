@@ -1,4 +1,5 @@
 import event_management.EventManager;
+import general.Company;
 
 public class RunInvestment {
 
@@ -63,7 +64,8 @@ public class RunInvestment {
 		// create an event filter, pass it to eventmanager and it finds all the similar 
 		
 		EventManager eventManager = EventManager.getInstance();
-		eventManager.findEvents();
+		eventManager.findEvents(Company.apple.getSymbol());
+		//eventManager.monitorEvent(Company.apple.getSymbol(), 20, "2014-9-16");
 		
 	}
 
